@@ -1,0 +1,32 @@
+services:
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    environment:
+      POSTGRES_DB: trocskillhubdb
+      POSTGRES_USER: MoSa
+      POSTGRES_PASSWORD: adatech
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  trocskillhub-app:
+    build: .
+    container_name: spring-boot
+    depends_on:
+      - postgres
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/trocskillhubdb
+      SPRING_DATASOURCE_USERNAME: MoSa
+      SPRING_DATASOURCE_PASSWORD: adatech
+    ports:
+      - "8080:8080"
+
+networks:
+  troc-network:
+    name: trocskillhub-network 
+    driver: bridge
+
+volumes:
+  postgres_data:
