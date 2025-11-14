@@ -1,0 +1,21 @@
+# Dossiers Git
+.git/
+.gitignore
+
+# Dossiers de build et caches
+target/
+!.mvn/wrapper/maven-wrapper.jar
+
+# Dossiers IDE
+.idea/
+.vscode/
+*.iml
+*.iws
+
+# Fichiers temporaires et caches
+*.log
+*.swp
+*.swo
+.DS_Store
+*.bak
+
