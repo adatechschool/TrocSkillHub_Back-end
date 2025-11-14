@@ -11,7 +11,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-  trocskillhub-app:
+  app:
     build: .
     container_name: spring-boot
     depends_on:
