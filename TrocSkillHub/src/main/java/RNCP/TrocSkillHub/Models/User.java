@@ -54,7 +54,7 @@ public class User {
     private LocalDate createdAt;  
     
     // Getters
-    public Integer getId() {
+    public Serial getId() {
         return id;
     }
 
@@ -99,7 +99,7 @@ public class User {
     }
 
     // Setters
-    public void setId(Integer id) {
+    public void setId(Serial id) {
         this.id = id;
     }
 
