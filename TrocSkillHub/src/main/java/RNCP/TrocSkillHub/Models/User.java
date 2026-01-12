@@ -3,6 +3,7 @@ package RNCP.TrocSkillHub.Models;
 import jakarta.persistence.*;
 import jakarta.persistence.GeneratedValue;
 
+import java.io.Serial;
 import java.time.LocalDate;
 
 import org.springframework.data.annotation.Id;
@@ -15,7 +16,7 @@ public class User {
 
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
-    private Integer id;
+    private Serial id;
     
     @Column(name = "first_name", nullable = false)
     private String firstName;
