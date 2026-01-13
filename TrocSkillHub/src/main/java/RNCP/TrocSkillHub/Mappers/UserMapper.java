@@ -14,7 +14,7 @@ import RNCP.TrocSkillHub.Models.User;
 
 public interface UserMapper {
     // Convertit l'entité User en UserDTO
-    UserDTO tDTO(User user); 
+    UserDTO toDTO(User user); 
 
     // Convertit l'UserDTO en entité User
     User toEntity(UserDTO userDTO);

@@ -1,6 +1,5 @@
 package RNCP.TrocSkillHub.Repositories;
 
-import java.io.Long;
 import java.util.List;
 import java.util.Optional;
 

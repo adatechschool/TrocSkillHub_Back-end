@@ -2,13 +2,9 @@ package RNCP.TrocSkillHub.Models;
 
 import jakarta.persistence.*;
 
-import java.io.Long;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
-import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.annotation.LastModifiedDate;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 

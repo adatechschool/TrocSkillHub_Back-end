@@ -2,7 +2,6 @@ package RNCP.TrocSkillHub.Services;
 
 import RNCP.TrocSkillHub.Models.User;
 
-import java.io.Long;
 import java.util.List;
 import java.util.Optional;
 
