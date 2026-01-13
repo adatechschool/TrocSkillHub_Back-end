@@ -6,7 +6,9 @@ import java.io.Serial;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.LastModifiedDate;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -51,7 +53,10 @@ public class User {
     private String description;
     
     @Column(name = "created_at", nullable = false)
-    private LocalDate createdAt;  
+    private LocalDate createdAt;
+
+    @Column(name = "updated_at")
+    private LocalDate updatedAt;
     
     // Constructeur
     public User() {
@@ -68,6 +73,7 @@ public class User {
         this.email = email;
         this.picture = picture;
         this.createdAt = LocalDate.now();
+        this.updatedAt = LocalDate.now();
     }
     // Getters
     public Serial getId() {
