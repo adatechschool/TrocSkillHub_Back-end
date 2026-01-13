@@ -1,10 +1,10 @@
 package RNCP.TrocSkillHub.Models;
 
 import jakarta.persistence.*;
-import jakarta.persistence.GeneratedValue;
 
 import java.io.Serial;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import org.springframework.data.annotation.Id;
 
@@ -53,6 +53,22 @@ public class User {
     @Column(name = "created_at", nullable = false)
     private LocalDate createdAt;  
     
+    // Constructeur
+    public User() {
+    }
+
+    public User(String firstName,String lastName,String address,String country,String city,String phoneNumber, String email, byte[] picture) {
+       
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.address = address;
+        this.country = country;
+        this.city = city;
+        this.phoneNumber = phoneNumber;
+        this.email = email;
+        this.picture = picture;
+        this.createdAt = LocalDate.now();
+    }
     // Getters
     public Serial getId() {
         return id;
@@ -146,4 +162,18 @@ public class User {
     public void setCreatedAt(LocalDate createdAt) {
         this.createdAt = createdAt;
     }
+@Override
+public String toString() {
+    return "User{" +
+            "firstName='" + firstName + '\'' +
+            ", lastName='" + lastName + '\'' +
+            ", address='" + address + '\'' +
+            ", country='" + country + '\'' +
+            ", city='" + city + '\'' +
+            ", phoneNumber='" + phoneNumber + '\'' +
+            ", email='" + email + '\'' +
+            ", picture=" + (picture != null ? "byte[" + picture.length + "]" : "null") +
+            ", createdAt=" + createdAt +
+            '}';
+}
 }
