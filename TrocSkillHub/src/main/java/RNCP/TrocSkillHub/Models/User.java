@@ -2,7 +2,7 @@ package RNCP.TrocSkillHub.Models;
 
 import jakarta.persistence.*;
 
-import java.io.Serial;
+import java.io.Long;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -18,7 +18,7 @@ public class User {
 
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
-    private Serial id;
+    private Long id;
     
     @Column(name = "first_name", nullable = false)
     private String firstName;
@@ -76,7 +76,7 @@ public class User {
         this.updatedAt = LocalDate.now();
     }
     // Getters
-    public Serial getId() {
+    public Long getId() {
         return id;
     }
 
@@ -121,7 +121,7 @@ public class User {
     }
 
     // Setters
-    public void setId(Serial id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

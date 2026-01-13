@@ -1,6 +1,6 @@
 package RNCP.TrocSkillHub.Repositories;
 
-import java.io.Serial;
+import java.io.Long;
 import java.util.List;
 import java.util.Optional;
 
@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import RNCP.TrocSkillHub.Models.User;
 @Repository
-public interface UserRepository extends JpaRepository <User, Serial>{ 
+public interface UserRepository extends JpaRepository <User, Long>{ 
     Optional <User> findByEmail(String email);
     Boolean existsByEmail(String email);
     List <User> findByCity(String city);

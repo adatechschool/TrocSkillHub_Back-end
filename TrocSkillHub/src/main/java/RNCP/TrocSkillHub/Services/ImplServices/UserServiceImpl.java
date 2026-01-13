@@ -1,13 +1,16 @@
 package RNCP.TrocSkillHub.Services.ImplServices;
 
-import java.io.Serial;
+import java.io.Long;
 import java.util.List;
 import java.util.Optional;
+
+import org.springframework.stereotype.Service;
 
 import RNCP.TrocSkillHub.Models.User;
 import RNCP.TrocSkillHub.Repositories.UserRepository;
 import RNCP.TrocSkillHub.Services.UserService;
 
+@Service
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
@@ -32,12 +35,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Optional<User> getUserById(Serial id){
+    public Optional<User> getUserById(Long id){
         return userRepository.findById(id);
     }
 
     @Override
-    public User updateUser(Serial id, User user){
+    public User updateUser(Long id, User user){
         return userRepository.findById(id)
         .map(existingUser -> {
             existingUser.setFirstName(user.getFirstName());
@@ -55,7 +58,7 @@ public class UserServiceImpl implements UserService {
 
     }
     @Override
-    public void deleteUser(Serial id) {
+    public void deleteUser(Long id) {
         if (!userRepository.existsById(id)) {
             throw new RuntimeException("Utilisateur non trouvé avec l'id: " + id);
         }

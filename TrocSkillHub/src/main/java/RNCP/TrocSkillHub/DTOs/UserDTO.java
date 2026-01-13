@@ -1,9 +1,8 @@
 package RNCP.TrocSkillHub.DTOs;
 
-import java.io.Serial;
 
 public record UserDTO (
-    Serial id,
+    Long id,
     String firstName,
     String lastName,
     String email,
