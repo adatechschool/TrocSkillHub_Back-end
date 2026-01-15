@@ -1,5 +1,6 @@
 package RNCP.TrocSkillHub.Services.ImplServices;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -51,6 +52,7 @@ public class UserServiceImpl implements UserService {
             existingUser.setCountry(user.getCountry());
             existingUser.setPhoneNumber(user.getPhoneNumber());
             existingUser.setDescription(user.getDescription());
+            user.setUpdatedAt(LocalDate.now());
             return userRepository.save(existingUser);
         })
         .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé avec l'id: " + id));

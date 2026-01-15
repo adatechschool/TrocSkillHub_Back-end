@@ -113,6 +113,9 @@ public class User {
     public LocalDate getCreatedAt() {
         return createdAt;
     }
+    public LocalDate getUpdateAt(){
+        return updatedAt;
+    }
 
     // Setters
     public void setId(Long id) {
@@ -161,6 +164,10 @@ public class User {
 
     public void setCreatedAt(LocalDate createdAt) {
         this.createdAt = createdAt;
+    }
+    
+    public void setUpdatedAt(LocalDate updateAt){
+        this.updatedAt = updateAt;
     }
 @Override
 public String toString() {
