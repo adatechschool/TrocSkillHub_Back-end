@@ -46,11 +46,21 @@ public class User {
     @Column(nullable = true, columnDefinition = "TEXT")
     private String description;
     
-    @Column(name = "created_at", nullable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDate createdAt;
 
     @Column(name = "updated_at")
     private LocalDate updatedAt;
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDate.now();
+    }
+    
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = LocalDate.now();
+    }
     
     // Constructeur
     public User() {
@@ -66,8 +76,6 @@ public class User {
         this.phoneNumber = phoneNumber;
         this.email = email;
         this.picture = picture;
-        this.createdAt = LocalDate.now();
-        this.updatedAt = LocalDate.now();
     }
     // Getters
     public Long getId() {
@@ -113,7 +121,7 @@ public class User {
     public LocalDate getCreatedAt() {
         return createdAt;
     }
-    public LocalDate getUpdateAt(){
+    public LocalDate getUpdatedAt(){
         return updatedAt;
     }
 
@@ -181,6 +189,7 @@ public String toString() {
             ", email='" + email + '\'' +
             ", picture=" + (picture != null ? "byte[" + picture.length + "]" : "null") +
             ", createdAt=" + createdAt +
+            ", updatedAt=" + updatedAt +
             '}';
 }
 }
