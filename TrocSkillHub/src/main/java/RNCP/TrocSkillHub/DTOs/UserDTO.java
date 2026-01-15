@@ -1,6 +1,5 @@
 package RNCP.TrocSkillHub.DTOs;
 
-
 public record UserDTO (
     Long id,
     String firstName,
