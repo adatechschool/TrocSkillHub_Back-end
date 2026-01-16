@@ -1,11 +1,4 @@
 --V1__initial_schema.sql
--- Baseline de la base de données existante créée par Hibernate
--- Cette migration est documentaire uniquement
-
--- Table user créée initialement par Hibernate
--- Structure existante :
--- V1__initial_schema.sql
--- Baseline de la base de données créée initialement par Hibernate
 
 CREATE TABLE "user" (
     id BIGSERIAL PRIMARY KEY,
