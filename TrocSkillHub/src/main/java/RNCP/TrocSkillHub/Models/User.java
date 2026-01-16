@@ -2,7 +2,10 @@ package RNCP.TrocSkillHub.Models;
 
 import jakarta.persistence.*;
 
+import java.sql.Types;
 import java.time.LocalDate;
+
+import org.hibernate.annotations.JdbcTypeCode;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -20,7 +23,7 @@ public class User {
     @Column(name = "last_name", nullable = false)
     private String lastName;
     
-    @Lob
+    @JdbcTypeCode(Types.BINARY)
     @Column(nullable = true)
     private byte[] picture;
     
