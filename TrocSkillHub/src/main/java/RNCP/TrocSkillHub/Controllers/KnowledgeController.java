@@ -19,28 +19,28 @@ public class KnowledgeController {
         this.knowledgeService = knowledgeService;
     }
     
-    // GET /knowledges - Liste tous les knowledges
+    // GET /knowledges - List all knowledges
     @GetMapping
     public ResponseEntity<List<KnowledgeDTO>> getAllKnowledges() {
         List<KnowledgeDTO> knowledges = knowledgeService.getAllKnowledges();
         return ResponseEntity.ok(knowledges);
     }
     
-    // GET /knowledges/{id} - Récupère un knowledge par son ID
+    // GET /knowledges/{id} - Get a knowledge by id
     @GetMapping("/{id}")
     public ResponseEntity<KnowledgeDTO> getKnowledgeById(@PathVariable Long id) {
         KnowledgeDTO knowledge = knowledgeService.getKnowledgeById(id);
         return ResponseEntity.ok(knowledge);
     }
     
-    // POST /knowledges - Crée un nouveau knowledge
+    // POST /knowledges - Create a new knowledge
     @PostMapping
     public ResponseEntity<KnowledgeDTO> createKnowledge(@RequestBody KnowledgeDTO knowledgeDTO) {
         KnowledgeDTO created = knowledgeService.createKnowledge(knowledgeDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
     
-    // PUT /knowledges/{id} - Met à jour un knowledge existant
+    // PUT /knowledges/{id} - Update an existing knowledge
     @PutMapping("/{id}")
     public ResponseEntity<KnowledgeDTO> updateKnowledge(
             @PathVariable Long id, 
@@ -49,7 +49,7 @@ public class KnowledgeController {
         return ResponseEntity.ok(updated);
     }
     
-    // DELETE /knowledges/{id} - Supprime un knowledge
+    // DELETE /knowledges/{id} - Delete a knowledge
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteKnowledge(@PathVariable Long id) {
         knowledgeService.deleteKnowledge(id);
