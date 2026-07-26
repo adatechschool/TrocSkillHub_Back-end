@@ -41,7 +41,7 @@ public class JwtAuthFIlter extends OncePerRequestFilter {
             HttpServletResponse response,
             FilterChain filterChain) throws ServletException, IOException {
 
-        // 3. Extrait le token (on enlève "Bearer ")
+        // Extract the token (strip the "Bearer " prefix when present)
         String token = null;
 
         String authHeader = request.getHeader("Authorization");
@@ -56,7 +56,7 @@ if (authHeader != null && authHeader.startsWith("Bearer ")) {
                     break;
                 }
             }
-        // 4. Vérifie le token et authentifie l'utilisateur
+        // Validate the token and authenticate the user
         if (token != null && jwtService.isTokenValid(token)) {
             String email = jwtService.extractEmail(token);
             UserDetails userDetails = userDetailsService.loadUserByUsername(email);

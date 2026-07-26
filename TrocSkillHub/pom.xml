@@ -30,6 +30,7 @@
         <java.version>21</java.version>
         <org.mapstruct.version>1.5.5.Final</org.mapstruct.version>
         <lombok.version>1.18.30</lombok.version>
+        <jacoco.version>0.8.13</jacoco.version>
     </properties>
     <dependencies>
 
@@ -109,6 +110,19 @@
             <artifactId>bcprov-jdk18on</artifactId>
             <version>1.83</version>
         </dependency>
+
+<!-- Template engine (CV document composition) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-thymeleaf</artifactId>
+        </dependency>
+
+<!-- HTML → PDF (simplified CCM composition engine, V1) -->
+        <dependency>
+            <groupId>com.openhtmltopdf</groupId>
+            <artifactId>openhtmltopdf-pdfbox</artifactId>
+            <version>1.0.10</version>
+        </dependency>
         
 <!-- JWT Dependencies -->
     <dependency>
@@ -146,7 +160,7 @@
                 </configuration>
             </plugin>
 
-            <!-- Plugin de compilation pour MapStruct + Lombok -->
+            <!-- Compiler plugin for MapStruct + Lombok -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -155,7 +169,7 @@
                     <source>21</source>
                     <target>21</target>
                     <annotationProcessorPaths>
-                        <!-- IMPORTANT: Lombok AVANT MapStruct -->
+                        <!-- IMPORTANT: Lombok BEFORE MapStruct -->
                         <path>
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok</artifactId>
@@ -166,7 +180,7 @@
                             <artifactId>mapstruct-processor</artifactId>
                             <version>${org.mapstruct.version}</version>
                         </path>
-                        <!-- Binding Lombok + MapStruct -->
+                        <!-- Lombok + MapStruct binding -->
                         <path>
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok-mapstruct-binding</artifactId>
@@ -176,7 +190,7 @@
                 </configuration>
             </plugin>
 
-             <!-- Plugin de compilation pour Flyway -->
+             <!-- Flyway Maven plugin -->
             <plugin>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-maven-plugin</artifactId>
@@ -190,7 +204,63 @@
                 </locations>
             </configuration>
         </plugin>
+
+            <!-- JaCoCo: instrumentation during tests + HTML/XML coverage report -->
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${jacoco.version}</version>
+                <executions>
+                    <execution>
+                        <id>prepare-agent</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>report</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
+
+    <!--
+      When OrbStack is installed, point Testcontainers to its Docker socket.
+      Linux CI keeps the default /var/run/docker.sock (profile stays inactive).
+    -->
+    <profiles>
+        <profile>
+            <id>orbstack</id>
+            <activation>
+                <file>
+                    <exists>${user.home}/.orbstack/run/docker.sock</exists>
+                </file>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <!-- OrbStack does not expose /var/run/docker.sock; Testcontainers needs this host. -->
+                            <environmentVariables>
+                                <DOCKER_HOST>unix://${user.home}/.orbstack/run/docker.sock</DOCKER_HOST>
+                                <TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE>${user.home}/.orbstack/run/docker.sock</TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE>
+                                <TESTCONTAINERS_HOST_OVERRIDE>localhost</TESTCONTAINERS_HOST_OVERRIDE>
+                            </environmentVariables>
+                            <systemPropertyVariables>
+                                <docker.host>unix://${user.home}/.orbstack/run/docker.sock</docker.host>
+                            </systemPropertyVariables>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 </project>

@@ -20,11 +20,6 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
-import com.jayway.jsonpath.JsonPath;
-
-
-
-
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -73,11 +68,15 @@ void setUp() throws Exception {
                 }
                 """))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.token").exists())
+            .andExpect(jsonPath("$.message").value("Connexion réussie"))
+            .andExpect(jsonPath("$.token").doesNotExist())
             .andReturn();
 
-            String body = loginResult.getResponse().getContentAsString();
-    jwtToken = JsonPath.read(body, "$.token");
+    String setCookie = loginResult.getResponse().getHeader("Set-Cookie");
+    if (setCookie == null || !setCookie.startsWith("jwt=")) {
+        throw new IllegalStateException("JWT cookie missing from login response");
+    }
+    jwtToken = setCookie.substring("jwt=".length(), setCookie.indexOf(';'));
 
 }
 @Test

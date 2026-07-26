@@ -15,18 +15,21 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.Optional;
-import java.util.Random;
 
 @Service
 public class PasswordResetServiceImpl implements PasswordResetService {
+
+    private static final int CODE_DIGITS = 6;
+    private static final int CODE_BOUND = 1_000_000;
 
     private final UserRepository userRepository;
     private final PasswordResetRequestRepository resetRepository;
     private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
-    private final Random random = new Random();
+    private final SecureRandom secureRandom = new SecureRandom();
     private final int codeExpiryMinutes;
     private final int maxAttempts;
     private static final Logger logger = LoggerFactory.getLogger(PasswordResetServiceImpl.class);
@@ -49,12 +52,12 @@ public class PasswordResetServiceImpl implements PasswordResetService {
     public void requestReset(PasswordResetRequestDto requestDto) {
         Optional<User> userOpt = userRepository.findByEmail(requestDto.getEmail());
         if (userOpt.isEmpty()) {
-            logger.info("Password reset request for non-existent email: {}", requestDto.getEmail());
+            logger.info("Password reset request for unknown account");
             return;
         }
 
         User user = userOpt.get();
-        String code = String.format("%04d", random.nextInt(10000));
+        String code = String.format("%0" + CODE_DIGITS + "d", secureRandom.nextInt(CODE_BOUND));
         String codeHash = passwordEncoder.encode(code);
         PasswordResetRequest prr = new PasswordResetRequest();
         prr.setUser(user);
@@ -63,7 +66,7 @@ public class PasswordResetServiceImpl implements PasswordResetService {
         prr.setUsed(false);
         prr.setAttempts(0);
         resetRepository.save(prr);
-        logger.info("Password reset code generated for user: {}", user.getEmail());
+        logger.info("Password reset code generated for user id={}", user.getId());
         emailService.sendPasswordResetCode(user.getEmail(), code);
     }
 
@@ -71,24 +74,24 @@ public class PasswordResetServiceImpl implements PasswordResetService {
     public String verifyCode(PasswordResetVerifyDto verifyDto) {
         Optional<User> userOpt = userRepository.findByEmail(verifyDto.getEmail());
         if (userOpt.isEmpty()) {
-            logger.warn("Code verification for non-existent email: {}", verifyDto.getEmail());
+            logger.warn("Code verification for unknown account");
             throw new IllegalArgumentException("Invalid code or request");
         }
         User user = userOpt.get();
         Optional<PasswordResetRequest> prrOpt = resetRepository.findTopByUserOrderByCreatedAtDesc(user);
         if (prrOpt.isEmpty()) {
-            logger.warn("Code verification: no reset request found for user: {}", user.getEmail());
+            logger.warn("Code verification: no reset request found for user id={}", user.getId());
             throw new IllegalArgumentException("Invalid code or request");
         }
         PasswordResetRequest prr = prrOpt.get();
         if (prr.isUsed() || prr.getExpiresAt().isBefore(LocalDateTime.now())) {
-            logger.warn("Code verification failed (expired or used) for user: {}", user.getEmail());
+            logger.warn("Code verification failed (expired or used) for request id={}", prr.getId());
             throw new IllegalArgumentException("Code expired or used");
         }
         if (prr.getAttempts() >= maxAttempts) {
             prr.setUsed(true);
             resetRepository.save(prr);
-            logger.warn("Code verification blocked: max attempts exceeded for user: {}", user.getEmail());
+            logger.warn("Code verification blocked: max attempts exceeded for request id={}", prr.getId());
             throw new IllegalArgumentException("Too many attempts");
         }
 
@@ -96,11 +99,11 @@ public class PasswordResetServiceImpl implements PasswordResetService {
         if (!matches) {
             prr.setAttempts(prr.getAttempts() + 1);
             resetRepository.save(prr);
-            logger.warn("Invalid code attempt {} for user: {}", prr.getAttempts(), user.getEmail());
+            logger.warn("Invalid code attempt {} for request id={}", prr.getAttempts(), prr.getId());
             throw new IllegalArgumentException("Invalid code or request");
         }
 
-        logger.info("Code verified successfully for user: {}", user.getEmail());
+        logger.info("Code verified successfully for request id={}", prr.getId());
         return prr.getId().toString();
     }
 
@@ -115,32 +118,32 @@ public class PasswordResetServiceImpl implements PasswordResetService {
         }
         Optional<PasswordResetRequest> prrOpt = resetRepository.findById(prrId);
         if (prrOpt.isEmpty()) {
-            logger.warn("Reset request not found for id: {}", prrId);
+            logger.warn("Reset request not found");
             throw new IllegalArgumentException("Invalid reset token");
         }
         PasswordResetRequest prr = prrOpt.get();
         if (prr.isUsed() || prr.getExpiresAt().isBefore(LocalDateTime.now())) {
-            logger.warn("Reset request invalid or expired for id: {}", prrId);
+            logger.warn("Reset request invalid or expired for id={}", prrId);
             throw new IllegalArgumentException("Reset request invalid or expired");
         }
 
         if (!resetDto.getNewPassword().equals(resetDto.getConfirmPassword())) {
-            logger.warn("Password confirmation mismatch for reset request: {}", prrId);
+            logger.warn("Password confirmation mismatch for reset request id={}", prrId);
             throw new IllegalArgumentException("Passwords do not match");
         }
 
         if (resetDto.getNewPassword().length() < 8) {
-            logger.warn("Password does not meet policy for reset request: {}", prrId);
+            logger.warn("Password does not meet policy for reset request id={}", prrId);
             throw new IllegalArgumentException("Password does not meet policy");
         }
 
         User user = prr.getUser();
         user.setPassword(passwordEncoder.encode(resetDto.getNewPassword()));
         userRepository.save(user);
-        logger.info("Password updated for user: {}", user.getEmail());
+        logger.info("Password updated for user id={}", user.getId());
 
         prr.setUsed(true);
         resetRepository.save(prr);
-        logger.info("Reset request marked as used for id: {}", prrId);
+        logger.info("Reset request marked as used for id={}", prrId);
     }
 }

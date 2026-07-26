@@ -26,6 +26,7 @@ import RNCP.TrocSkillHub.Services.UserService;
 public class UserController {
     private final UserService userService;
     private final UserMapper userMapper;
+
     @Autowired
     public UserController(UserService userService, UserMapper userMapper) {
         this.userService = userService;
@@ -40,8 +41,8 @@ public class UserController {
     }
 
     /**
-     * Profil de l'utilisateur authentifié, résolu à partir du token/session
-     * (comme /auth/me) : ne nécessite jamais l'id en base dans l'URL.
+     * Authenticated user profile, resolved from the token/session
+     * (same approach as /auth/me): never requires the database id in the URL.
      */
     @GetMapping("/me")
     public ResponseEntity<?> getCurrentUser(Authentication authentication) {

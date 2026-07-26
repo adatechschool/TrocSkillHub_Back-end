@@ -244,8 +244,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Optional<User> getUserByEmail(String email) {
-        return userRepository.findByEmail(email);
+        return userRepository.findByEmail(email).map(user -> {
+            initializeProfileCollections(user);
+            return user;
+        });
     }
 
     @Override

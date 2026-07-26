@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Fiche compétences TrocSkillHub</title>
+    <style>
+        @page { margin: 2cm; }
+        body {
+            font-family: Helvetica, Arial, sans-serif;
+            color: #1a1a1a;
+            font-size: 11pt;
+            line-height: 1.45;
+        }
+        .brand {
+            font-size: 10pt;
+            color: #2f6f4e;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+        .doc-title {
+            font-size: 18pt;
+            font-weight: bold;
+            margin: 0 0 16px 0;
+            border-bottom: 2px solid #2f6f4e;
+            padding-bottom: 8px;
+        }
+        .identity-name {
+            font-size: 16pt;
+            font-weight: bold;
+            margin: 0 0 4px 0;
+        }
+        .identity-meta {
+            color: #444;
+            margin: 0 0 18px 0;
+        }
+        h2 {
+            font-size: 12pt;
+            color: #2f6f4e;
+            border-bottom: 1px solid #cfe0d6;
+            padding-bottom: 4px;
+            margin: 18px 0 8px 0;
+        }
+        ul { margin: 0 0 8px 18px; padding: 0; }
+        li { margin-bottom: 3px; }
+        .item { margin-bottom: 10px; }
+        .item-title { font-weight: bold; margin: 0; }
+        .item-sub { color: #555; font-size: 10pt; margin: 2px 0 0 0; }
+        .item-body { margin: 4px 0 0 0; }
+        .muted { color: #666; font-size: 10pt; }
+    </style>
+</head>
+<body>
+    <div class="brand">TrocSkillHub</div>
+    <h1 class="doc-title">Fiche compétences</h1>
+
+    <p class="identity-name"
+       th:text="${profile.firstName + ' ' + profile.lastName}">Prénom Nom</p>
+    <p class="identity-meta">
+        <span th:if="${profile.city != null and !#strings.isEmpty(profile.city)}"
+              th:text="${profile.city}">Ville</span>
+        <span th:if="${profile.city != null and !#strings.isEmpty(profile.city)
+                       and profile.country != null and !#strings.isEmpty(profile.country)}">, </span>
+        <span th:if="${profile.country != null and !#strings.isEmpty(profile.country)}"
+              th:text="${profile.country}">Pays</span>
+        <span th:if="${(profile.city != null and !#strings.isEmpty(profile.city))
+                       or (profile.country != null and !#strings.isEmpty(profile.country))}"> — </span>
+        <span th:text="${profile.email}">email@mail.com</span>
+    </p>
+
+    <div th:if="${profile.description != null and !#strings.isEmpty(profile.description)}">
+        <h2>À propos</h2>
+        <p th:text="${profile.description}">Description</p>
+    </div>
+
+    <div th:if="${profile.hasSkills}">
+        <h2>Compétences proposées</h2>
+        <ul>
+            <li th:each="skill : ${profile.skills}">
+                <span th:text="${skill.knowledgeName}">Compétence</span>
+                <span th:if="${skill.level != null and !#strings.isEmpty(skill.level)}"
+                      th:text="${' (' + skill.level + ')'}"> (niveau)</span>
+            </li>
+        </ul>
+    </div>
+
+    <div th:if="${profile.hasNeeds}">
+        <h2>Compétences recherchées</h2>
+        <ul>
+            <li th:each="need : ${profile.needs}">
+                <span th:text="${need.knowledgeName}">Besoin</span>
+                <span th:if="${need.level != null and !#strings.isEmpty(need.level)}"
+                      th:text="${' (' + need.level + ')'}"> (niveau)</span>
+            </li>
+        </ul>
+    </div>
+
+    <div th:if="${profile.hasEducation}">
+        <h2>Formations</h2>
+        <div class="item" th:each="edu : ${profile.education}">
+            <p class="item-title"
+               th:text="${edu.name != null ? edu.name : 'Formation'}">Formation</p>
+            <p class="item-sub"
+               th:if="${edu.school != null and !#strings.isEmpty(edu.school)}"
+               th:text="${edu.school}">École</p>
+            <p class="muted"
+               th:if="${edu.dateStart != null or edu.dateEnd != null}">
+                <span th:if="${edu.dateStart != null}" th:text="${edu.dateStart}">2020-01-01</span>
+                <span th:if="${edu.dateStart != null or edu.dateEnd != null}"> – </span>
+                <span th:if="${edu.dateEnd != null}" th:text="${edu.dateEnd}">2022-01-01</span>
+                <span th:if="${edu.dateStart != null and edu.dateEnd == null}">présent</span>
+            </p>
+        </div>
+    </div>
+
+    <div th:if="${profile.hasExperience}">
+        <h2>Expériences</h2>
+        <div class="item" th:each="exp : ${profile.experience}">
+            <p class="item-title"
+               th:text="${exp.job != null ? exp.job : 'Expérience'}">Poste</p>
+            <p class="item-sub"
+               th:if="${exp.company != null and !#strings.isEmpty(exp.company)}"
+               th:text="${exp.company}">Entreprise</p>
+            <p class="muted"
+               th:if="${exp.dateStart != null or exp.dateEnd != null}">
+                <span th:if="${exp.dateStart != null}" th:text="${exp.dateStart}">2020-01-01</span>
+                <span th:if="${exp.dateStart != null or exp.dateEnd != null}"> – </span>
+                <span th:if="${exp.dateEnd != null}" th:text="${exp.dateEnd}">2022-01-01</span>
+                <span th:if="${exp.dateStart != null and exp.dateEnd == null}">présent</span>
+            </p>
+        </div>
+    </div>
+
+    <div th:if="${profile.hasProjects}">
+        <h2>Projets</h2>
+        <div class="item" th:each="proj : ${profile.project}">
+            <p class="item-title"
+               th:text="${proj.name != null ? proj.name : 'Projet'}">Projet</p>
+            <p class="muted"
+               th:if="${proj.dateStart != null or proj.dateEnd != null}">
+                <span th:if="${proj.dateStart != null}" th:text="${proj.dateStart}">2020-01-01</span>
+                <span th:if="${proj.dateStart != null or proj.dateEnd != null}"> – </span>
+                <span th:if="${proj.dateEnd != null}" th:text="${proj.dateEnd}">2022-01-01</span>
+                <span th:if="${proj.dateStart != null and proj.dateEnd == null}">présent</span>
+            </p>
+            <p class="item-body"
+               th:if="${proj.description != null and !#strings.isEmpty(proj.description)}"
+               th:text="${proj.description}">Description</p>
+            <p class="muted"
+               th:if="${proj.links != null and !#strings.isEmpty(proj.links)}"
+               th:text="${'Lien : ' + proj.links}">Lien</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -76,9 +76,9 @@ public class UserControllerTest {
             "jean", "ali", null, null, null, null
         );
 
-        // Par défaut, l'utilisateur authentifié correspond au propriétaire (id=1) ;
-        // utilisé uniquement par les tests qui en ont besoin (lenient pour éviter
-        // les UnnecessaryStubbingException sur les tests qui n'en ont pas besoin).
+        // By default, the authenticated user is the owner (id=1);
+        // used only by tests that need it (lenient to avoid
+        // UnnecessaryStubbingException on tests that do not).
         lenient().when(authentication.getName()).thenReturn("test@example.com");
         lenient().when(userService.getUserByEmail("test@example.com")).thenReturn(Optional.of(user));
     }

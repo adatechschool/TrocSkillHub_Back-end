@@ -1,33 +1,33 @@
-# --- Étape 1: Utilise une image Maven avec Java 21 pour le build ---
+# --- Stage 1: Maven image with Java 21 for the build ---
 FROM maven:3.9-eclipse-temurin-21 AS build
 
-# Définit le répertoire de travail dans le conteneur
+# Set the working directory inside the container
 WORKDIR /app
 
-# Copie le fichier pom.xml pour télécharger les dépendances en cache
+# Copy pom.xml first to cache dependency downloads
 COPY pom.xml .
 RUN --mount=type=cache,target=/root/.m2 mvn dependency:go-offline
 
-# Copie le code source
+# Copy the source code
 COPY src ./src
 
-# Construit le projet (sans exécuter les tests)
+# Build the project (skip tests)
 RUN --mount=type=cache,target=/root/.m2 mvn clean package -DskipTests
 
 
-# --- Étape 2 : Image finale légère pour l'exécution ---
+# --- Stage 2: Lightweight runtime image ---
 
-# Utilise une image JRE Java 21 (sans Maven)
+# Use a Java 21 JRE image (no Maven)
 FROM eclipse-temurin:21-jre
 
-# Définit le répertoire de travail
+# Set the working directory
 WORKDIR /app
 
-# Copie le JAR construit depuis l'étape 'build'
+# Copy the JAR built in the 'build' stage
 COPY --from=build /app/target/*.jar app.jar
 
-# Déclare le port sur lequel l'application écoute
+# Expose the application port
 EXPOSE 8080
 
-# Commande de démarrage de l'application
+# Application startup command
 ENTRYPOINT ["java", "-jar", "app.jar"]
