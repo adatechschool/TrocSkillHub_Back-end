@@ -33,3 +33,11 @@ jwt:
 app:
   cors:
     allowed-origins: http://localhost:5173
+  cookie:
+    secure: false
+    same-site: Lax
+  mail:
+    from: noreply@test.local
+  password-reset:
+    code-expiry-minutes: 15
+    max-attempts: 5

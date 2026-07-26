@@ -33,7 +33,7 @@ public class JwtService {
         return getClaims(token).getSubject();
     }
 
-    // Vérifie si le token est encore valide
+    // Check whether the token is still valid
     public boolean isTokenValid(String token) {
         try {
             return getClaims(token).getExpiration().after(new Date());

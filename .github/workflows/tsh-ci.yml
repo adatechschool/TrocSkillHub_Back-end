@@ -58,6 +58,14 @@ jobs:
           unset SPRING_DATASOURCE_URL || true
           mvn test
 
+      - name: Upload JaCoCo coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: trocskillhub-jacoco-${{ github.run_number }}
+          path: ./TrocSkillHub/target/site/jacoco/
+          retention-days: 14
+
       - name: Upload Surefire reports
         if: failure()
         uses: actions/upload-artifact@v4
