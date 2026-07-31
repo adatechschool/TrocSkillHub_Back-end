@@ -28,7 +28,7 @@ public class Project {
 
     // Relation with User
     @ManyToOne
-    @JoinColumn(name = "users_id", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     // Constructor required by JPA
