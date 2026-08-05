@@ -3,14 +3,12 @@ package RNCP.TrocSkillHub.Config;
 import RNCP.TrocSkillHub.Repositories.PasswordResetRequestRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 
 @Component
-@EnableScheduling
 public class PasswordResetCleanupScheduler {
 
     private final PasswordResetRequestRepository resetRepository;
@@ -21,20 +19,17 @@ public class PasswordResetCleanupScheduler {
     }
 
     /**
-     * Scheduled task to delete expired password reset requests.
-     * Runs every hour at the start of the hour.
+     * Deletes expired password reset requests every hour, on the hour.
+     *
+     * Expired requests are already rejected by the service, so this is not an
+     * access control: it limits how long a hash of a six-digit code stays in the
+     * database, and therefore what a database leak would expose.
      */
     @Scheduled(cron = "0 0 * * * *")
     public void cleanupExpiredResetRequests() {
-        logger.info("Starting cleanup of expired password reset requests...");
         try {
-            var expiredRequests = resetRepository.findByExpiresAtBefore(LocalDateTime.now());
-            if (!expiredRequests.isEmpty()) {
-                resetRepository.deleteAll(expiredRequests);
-                logger.info("Deleted {} expired password reset requests.", expiredRequests.size());
-            } else {
-                logger.info("No expired password reset requests found.");
-            }
+            int deleted = resetRepository.deleteExpiredBefore(LocalDateTime.now());
+            logger.info("Deleted {} expired password reset requests.", deleted);
         } catch (Exception e) {
             logger.error("Error during cleanup of password reset requests: {}", e.getMessage(), e);
         }
