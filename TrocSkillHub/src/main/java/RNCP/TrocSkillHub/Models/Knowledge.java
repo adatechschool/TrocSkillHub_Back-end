@@ -56,7 +56,7 @@ public class Knowledge {
     return userKnowledge;
   }
 
-public void setUser(List<UserKnowledge> userKnowledge) {
+public void setUserKnowledge(List<UserKnowledge> userKnowledge) {
     this.userKnowledge = userKnowledge;
 }
   @Override

@@ -45,6 +45,16 @@ public class UserServiceImpl implements UserService {
         this.passwordEncoder = passwordEncoder;
         this.userMapper = userMapper;
     }
+    
+    /**
+     * The public listing only exposes skills and needs, so the heavier profile
+     * collections are deliberately left out of the fetch plan.
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public List<User> getAllUsers() {
+        return userRepository.findAllWithKnowledge();
+    }
 
     @Override
     @Transactional
@@ -59,15 +69,6 @@ public class UserServiceImpl implements UserService {
         return userRepository.save(user);
     }
 
-    /**
-     * The public listing only exposes skills and needs, so the heavier profile
-     * collections are deliberately left out of the fetch plan.
-     */
-    @Override
-    @Transactional(readOnly = true)
-    public List<User> getAllUsers() {
-        return userRepository.findAllWithKnowledge();
-    }
 
     @Override
     @Transactional(readOnly = true)
