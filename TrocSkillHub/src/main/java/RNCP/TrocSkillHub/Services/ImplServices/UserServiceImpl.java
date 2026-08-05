@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import org.hibernate.Hibernate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,6 +47,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public User createUser(User user) {
         if (userRepository.existsByEmail(user.getEmail())) {
             throw new RuntimeException("Cet email existe déjà!");
@@ -59,30 +59,29 @@ public class UserServiceImpl implements UserService {
         return userRepository.save(user);
     }
 
+    /**
+     * The public listing only exposes skills and needs, so the heavier profile
+     * collections are deliberately left out of the fetch plan.
+     */
     @Override
     @Transactional(readOnly = true)
     public List<User> getAllUsers() {
-        List<User> users = userRepository.findAll();
-        users.forEach(this::initializeProfileCollections);
-        return users;
+        return userRepository.findAllWithKnowledge();
     }
 
     @Override
     @Transactional(readOnly = true)
     public Optional<User> getUserById(Long id) {
-        return userRepository.findById(id).map(user -> {
-            initializeProfileCollections(user);
-            return user;
-        });
+        return withProfileCollections(userRepository.findByIdWithKnowledge(id));
     }
 
     @Override
     @Transactional
     public User updateUser(Long id, UserRequestDTO requestDTO) {
-        User existingUser = userRepository.findById(id)
+        User existingUser = withProfileCollections(userRepository.findByIdWithKnowledge(id))
                 .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé avec l'id: " + id));
 
-        initializeProfileCollections(existingUser);
+        ensureCollections(existingUser);
 
         String newEmail = requestDTO.email();
         if (newEmail == null || newEmail.isBlank()) {
@@ -111,18 +110,16 @@ public class UserServiceImpl implements UserService {
         syncProjects(existingUser, requestDTO.project());
         syncUserKnowledge(existingUser, requestDTO.skills(), requestDTO.needs());
 
-        User saved = userRepository.save(existingUser);
-        initializeProfileCollections(saved);
-        return saved;
+        return userRepository.save(existingUser);
     }
 
     @Override
     @Transactional
     public User patchUser(Long id, UserRequestDTO requestDTO) {
-        User existingUser = userRepository.findById(id)
+        User existingUser = withProfileCollections(userRepository.findByIdWithKnowledge(id))
                 .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé avec l'id: " + id));
 
-        initializeProfileCollections(existingUser);
+        ensureCollections(existingUser);
 
         if (requestDTO.email() != null) {
             if (requestDTO.email().isBlank()) {
@@ -171,9 +168,7 @@ public class UserServiceImpl implements UserService {
         }
         patchUserKnowledge(existingUser, requestDTO.skills(), requestDTO.needs());
 
-        User saved = userRepository.save(existingUser);
-        initializeProfileCollections(saved);
-        return saved;
+        return userRepository.save(existingUser);
     }
 
     private void patchUserKnowledge(
@@ -197,12 +192,19 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    private void initializeProfileCollections(User user) {
-        ensureCollections(user);
-        Hibernate.initialize(user.getUserKnowledge());
-        Hibernate.initialize(user.getEducation());
-        Hibernate.initialize(user.getExperience());
-        Hibernate.initialize(user.getProject());
+    /**
+     * Completes a user already loaded with its knowledge: one extra query per
+     * remaining collection, because Hibernate cannot fetch several bags at once.
+     * Must run inside the caller's transaction so every query targets the same
+     * managed instance.
+     */
+    private Optional<User> withProfileCollections(Optional<User> user) {
+        user.map(User::getId).ifPresent(id -> {
+            userRepository.findByIdWithEducation(id);
+            userRepository.findByIdWithExperience(id);
+            userRepository.findByIdWithProject(id);
+        });
+        return user;
     }
 
     private void ensureCollections(User user) {
@@ -236,6 +238,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public void deleteUser(Long id) {
         if (!userRepository.existsById(id)) {
             throw new RuntimeException("Utilisateur non trouvé avec l'id: " + id);
@@ -246,10 +249,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(readOnly = true)
     public Optional<User> getUserByEmail(String email) {
-        return userRepository.findByEmail(email).map(user -> {
-            initializeProfileCollections(user);
-            return user;
-        });
+        return withProfileCollections(userRepository.findByEmailWithKnowledge(email));
     }
 
     @Override
