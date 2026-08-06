@@ -11,6 +11,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -47,6 +48,15 @@ public class AuthController {
         this.passwordEncoder = passwordEncoder;
         this.cookieSecure = cookieSecure;
         this.cookieSameSite = cookieSameSite;
+    }
+
+    /**
+     * Émet le cookie {@code XSRF-TOKEN} et renvoie le token en JSON
+     * (utile en cross-origin où {@code document.cookie} ne voit pas le cookie API).
+     */
+    @GetMapping("/csrf")
+    public CsrfToken csrf(CsrfToken csrfToken) {
+        return csrfToken;
     }
 
     @PostMapping("/register")
