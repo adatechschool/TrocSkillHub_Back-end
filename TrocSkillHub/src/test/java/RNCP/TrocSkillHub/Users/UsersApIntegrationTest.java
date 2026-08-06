@@ -1,5 +1,6 @@
 package RNCP.TrocSkillHub.Users;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -48,6 +49,7 @@ class UsersApiIntegrationTest {
  @BeforeEach
 void setUp() throws Exception {
     mockMvc.perform(post("/auth/register")
+            .with(csrf())
             .contentType(MediaType.APPLICATION_JSON)
             .content("""
                 {
@@ -60,6 +62,7 @@ void setUp() throws Exception {
                 }
                 """));
     MvcResult loginResult = mockMvc.perform(post("/auth/login")
+            .with(csrf())
             .contentType(MediaType.APPLICATION_JSON)
             .content("""
                 {

@@ -11,6 +11,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -49,6 +50,18 @@ public class AuthController {
         this.cookieSameSite = cookieSameSite;
     }
 
+    /**
+     * Issues the XSRF-TOKEN cookie and returns the raw token as JSON.
+     * Needed for cross-origin SPAs that cannot read the API cookie via document.cookie.
+     */
+    @GetMapping("/csrf")
+    public Map<String, String> csrf(CsrfToken csrfToken) {
+        return Map.of(
+                "token", csrfToken.getToken(),
+                "headerName", csrfToken.getHeaderName(),
+                "parameterName", csrfToken.getParameterName());
+    }
+
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody Map<String, String> body) {
         String nom = body.get("nom");
@@ -72,16 +85,14 @@ public class AuthController {
             newUser.setCity(city);
             newUser.setCountry(country);
 
-            User savedUser = userRepository.save(newUser);
+            userRepository.save(newUser);
 
             String token = jwtService.generateToken(email);
             ResponseCookie cookie = buildJwtCookie(token, Duration.ofDays(1));
 
             return ResponseEntity.ok()
                     .header(HttpHeaders.SET_COOKIE, cookie.toString())
-                    .body(Map.of(
-                            "message", "Inscription réussie",
-                            "id", savedUser.getId()));
+                    .body(Map.of("message", "Inscription réussie"));
 
         } catch (Exception e) {
             return ResponseEntity.status(500)
