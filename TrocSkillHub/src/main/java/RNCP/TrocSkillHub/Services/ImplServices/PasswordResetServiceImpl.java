@@ -66,7 +66,7 @@ public class PasswordResetServiceImpl implements PasswordResetService {
         prr.setUsed(false);
         prr.setAttempts(0);
         resetRepository.save(prr);
-        logger.info("Password reset code generated for user id={}", user.getId());
+        logger.info("Password reset code generated");
         emailService.sendPasswordResetCode(user.getEmail(), code);
     }
 
@@ -80,18 +80,18 @@ public class PasswordResetServiceImpl implements PasswordResetService {
         User user = userOpt.get();
         Optional<PasswordResetRequest> prrOpt = resetRepository.findTopByUserOrderByCreatedAtDesc(user);
         if (prrOpt.isEmpty()) {
-            logger.warn("Code verification: no reset request found for user id={}", user.getId());
+            logger.warn("Code verification: no reset request found");
             throw new IllegalArgumentException("Invalid code or request");
         }
         PasswordResetRequest prr = prrOpt.get();
         if (prr.isUsed() || prr.getExpiresAt().isBefore(LocalDateTime.now())) {
-            logger.warn("Code verification failed (expired or used) for request id={}", prr.getId());
+            logger.warn("Code verification failed (expired or used)");
             throw new IllegalArgumentException("Code expired or used");
         }
         if (prr.getAttempts() >= maxAttempts) {
             prr.setUsed(true);
             resetRepository.save(prr);
-            logger.warn("Code verification blocked: max attempts exceeded for request id={}", prr.getId());
+            logger.warn("Code verification blocked: max attempts exceeded");
             throw new IllegalArgumentException("Too many attempts");
         }
 
@@ -99,11 +99,11 @@ public class PasswordResetServiceImpl implements PasswordResetService {
         if (!matches) {
             prr.setAttempts(prr.getAttempts() + 1);
             resetRepository.save(prr);
-            logger.warn("Invalid code attempt {} for request id={}", prr.getAttempts(), prr.getId());
+            logger.warn("Invalid password reset code attempt");
             throw new IllegalArgumentException("Invalid code or request");
         }
 
-        logger.info("Code verified successfully for request id={}", prr.getId());
+        logger.info("Password reset code verified successfully");
         return prr.getId().toString();
     }
 
@@ -123,27 +123,27 @@ public class PasswordResetServiceImpl implements PasswordResetService {
         }
         PasswordResetRequest prr = prrOpt.get();
         if (prr.isUsed() || prr.getExpiresAt().isBefore(LocalDateTime.now())) {
-            logger.warn("Reset request invalid or expired for id={}", prrId);
+            logger.warn("Reset request invalid or expired");
             throw new IllegalArgumentException("Reset request invalid or expired");
         }
 
         if (!resetDto.getNewPassword().equals(resetDto.getConfirmPassword())) {
-            logger.warn("Password confirmation mismatch for reset request id={}", prrId);
+            logger.warn("Password confirmation mismatch during reset");
             throw new IllegalArgumentException("Passwords do not match");
         }
 
         if (resetDto.getNewPassword().length() < 8) {
-            logger.warn("Password does not meet policy for reset request id={}", prrId);
+            logger.warn("Password does not meet policy during reset");
             throw new IllegalArgumentException("Password does not meet policy");
         }
 
         User user = prr.getUser();
         user.setPassword(passwordEncoder.encode(resetDto.getNewPassword()));
         userRepository.save(user);
-        logger.info("Password updated for user id={}", user.getId());
+        logger.info("Password updated successfully");
 
         prr.setUsed(true);
         resetRepository.save(prr);
-        logger.info("Reset request marked as used for id={}", prrId);
+        logger.info("Password reset request marked as used");
     }
 }

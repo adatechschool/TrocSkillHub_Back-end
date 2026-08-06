@@ -5,34 +5,29 @@ import java.util.function.Supplier;
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import org.springframework.security.web.csrf.CsrfTokenRequestHandler;
-import org.springframework.security.web.csrf.XorCsrfTokenRequestAttributeHandler;
-import org.springframework.util.StringUtils;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 /**
- * Handler CSRF adapté aux SPA : résout le token depuis le header {@code X-XSRF-TOKEN}
- * et force l'émission du cookie {@code XSRF-TOKEN} (BREACH-safe via XOR).
- *
- * @see <a href="https://docs.spring.io/spring-security/reference/servlet/exploits/csrf.html#csrf-integration-javascript-spa">Spring Security CSRF SPA</a>
+ * Ensures the deferred CSRF token is loaded so CookieCsrfTokenRepository can write
+ * the XSRF-TOKEN cookie. Required because CsrfAuthenticationStrategy clears the cookie
+ * on every authenticated request and expects a fresh one to be materialised.
  */
 final class SpaCsrfTokenRequestHandler implements CsrfTokenRequestHandler {
 
-    private final CsrfTokenRequestHandler plain = new CsrfTokenRequestAttributeHandler();
-    private final CsrfTokenRequestHandler xor = new XorCsrfTokenRequestAttributeHandler();
+    private final CsrfTokenRequestAttributeHandler delegate = new CsrfTokenRequestAttributeHandler();
 
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response,
             Supplier<CsrfToken> csrfToken) {
-        this.xor.handle(request, response, csrfToken);
+        this.delegate.handle(request, response, csrfToken);
+        // Force deferred token load / cookie (re)write.
         csrfToken.get();
     }
 
     @Override
     public String resolveCsrfTokenValue(HttpServletRequest request, CsrfToken csrfToken) {
-        String headerValue = request.getHeader(csrfToken.getHeaderName());
-        return (StringUtils.hasText(headerValue) ? this.plain : this.xor)
-                .resolveCsrfTokenValue(request, csrfToken);
+        return this.delegate.resolveCsrfTokenValue(request, csrfToken);
     }
 }

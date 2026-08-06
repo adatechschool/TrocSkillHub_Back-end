@@ -51,12 +51,15 @@ public class AuthController {
     }
 
     /**
-     * Émet le cookie {@code XSRF-TOKEN} et renvoie le token en JSON
-     * (utile en cross-origin où {@code document.cookie} ne voit pas le cookie API).
+     * Issues the XSRF-TOKEN cookie and returns the raw token as JSON.
+     * Needed for cross-origin SPAs that cannot read the API cookie via document.cookie.
      */
     @GetMapping("/csrf")
-    public CsrfToken csrf(CsrfToken csrfToken) {
-        return csrfToken;
+    public Map<String, String> csrf(CsrfToken csrfToken) {
+        return Map.of(
+                "token", csrfToken.getToken(),
+                "headerName", csrfToken.getHeaderName(),
+                "parameterName", csrfToken.getParameterName());
     }
 
     @PostMapping("/register")
@@ -82,16 +85,14 @@ public class AuthController {
             newUser.setCity(city);
             newUser.setCountry(country);
 
-            User savedUser = userRepository.save(newUser);
+            userRepository.save(newUser);
 
             String token = jwtService.generateToken(email);
             ResponseCookie cookie = buildJwtCookie(token, Duration.ofDays(1));
 
             return ResponseEntity.ok()
                     .header(HttpHeaders.SET_COOKIE, cookie.toString())
-                    .body(Map.of(
-                            "message", "Inscription réussie",
-                            "id", savedUser.getId()));
+                    .body(Map.of("message", "Inscription réussie"));
 
         } catch (Exception e) {
             return ResponseEntity.status(500)
