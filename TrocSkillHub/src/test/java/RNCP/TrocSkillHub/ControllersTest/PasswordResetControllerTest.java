@@ -13,6 +13,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -24,6 +25,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -77,6 +79,7 @@ class PasswordResetControllerTest {
         PasswordResetRequestDto dto = new PasswordResetRequestDto("test@example.com");
 
         MvcResult result = mockMvc.perform(post("/auth/password-reset/request")
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isOk())
@@ -93,6 +96,7 @@ class PasswordResetControllerTest {
         PasswordResetRequestDto dto = new PasswordResetRequestDto("unknown@example.com");
 
         mockMvc.perform(post("/auth/password-reset/request")
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isOk())
@@ -107,6 +111,7 @@ class PasswordResetControllerTest {
         // Do 3 request 
         for (int i = 0; i < 3; i++) {
             mockMvc.perform(post("/auth/password-reset/request")
+                    .with(csrf())
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(dto)))
                     .andExpect(status().isOk());
@@ -114,6 +119,7 @@ class PasswordResetControllerTest {
 
         // rate limited
         mockMvc.perform(post("/auth/password-reset/request")
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isOk())
@@ -126,6 +132,7 @@ class PasswordResetControllerTest {
         PasswordResetVerifyDto dto = new PasswordResetVerifyDto("test@example.com", "wrong");
 
         mockMvc.perform(post("/auth/password-reset/verify")
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isBadRequest())
@@ -138,6 +145,7 @@ class PasswordResetControllerTest {
         PasswordResetVerifyDto dto = new PasswordResetVerifyDto("unknown@example.com", "1234");
 
         mockMvc.perform(post("/auth/password-reset/verify")
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isBadRequest())
@@ -150,6 +158,7 @@ class PasswordResetControllerTest {
         PasswordResetDto dto = new PasswordResetDto("invalid_token", "NewPassword123", "NewPassword123");
 
         mockMvc.perform(post("/auth/password-reset/reset")
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isBadRequest())
@@ -162,6 +171,7 @@ class PasswordResetControllerTest {
         PasswordResetDto dto = new PasswordResetDto("valid_token", "NewPassword123", "DifferentPassword");
 
         mockMvc.perform(post("/auth/password-reset/reset")
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isBadRequest())
@@ -174,6 +184,7 @@ class PasswordResetControllerTest {
         PasswordResetDto dto = new PasswordResetDto("valid_token", "short", "short");
 
         mockMvc.perform(post("/auth/password-reset/reset")
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isBadRequest())
