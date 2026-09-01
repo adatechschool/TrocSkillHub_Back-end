@@ -20,10 +20,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import RNCP.TrocSkillHub.Config.AuditLogger;
 import RNCP.TrocSkillHub.Config.JwtService;
+import RNCP.TrocSkillHub.DTOs.LoginRequest;
+import RNCP.TrocSkillHub.DTOs.RegisterRequest;
 import RNCP.TrocSkillHub.Models.User;
 import RNCP.TrocSkillHub.Repositories.UserRepository;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/auth")
@@ -67,13 +70,13 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody Map<String, String> body) {
-        String nom = body.get("nom");
-        String prenom = body.get("prenom");
-        String email = body.get("email");
-        String password = body.get("password");
-        String city = body.get("city");
-        String country = body.get("country");
+    public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest body) {
+        String nom = body.nom();
+        String prenom = body.prenom();
+        String email = body.email();
+        String password = body.password();
+        String city = body.city();
+        String country = body.country();
 
         try {
             if (userRepository.existsByEmail(email)) {
@@ -108,9 +111,9 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody Map<String, String> body) {
-        String email = body.get("email");
-        String password = body.get("password");
+    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest body) {
+        String email = body.email();
+        String password = body.password();
 
         try {
             authenticationManager.authenticate(

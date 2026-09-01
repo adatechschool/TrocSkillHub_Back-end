@@ -7,6 +7,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.validation.Valid;
+
 import java.util.List;
 
 @RestController
@@ -35,7 +37,7 @@ public class KnowledgeController {
     
     // POST /knowledges - Create a new knowledge
     @PostMapping
-    public ResponseEntity<KnowledgeDTO> createKnowledge(@RequestBody KnowledgeDTO knowledgeDTO) {
+    public ResponseEntity<KnowledgeDTO> createKnowledge(@Valid @RequestBody KnowledgeDTO knowledgeDTO) {
         KnowledgeDTO created = knowledgeService.createKnowledge(knowledgeDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
@@ -44,7 +46,7 @@ public class KnowledgeController {
     @PutMapping("/{id}")
     public ResponseEntity<KnowledgeDTO> updateKnowledge(
             @PathVariable Long id, 
-            @RequestBody KnowledgeDTO knowledgeDTO) {
+            @Valid @RequestBody KnowledgeDTO knowledgeDTO) {
         KnowledgeDTO updated = knowledgeService.updateKnowledge(id, knowledgeDTO);
         return ResponseEntity.ok(updated);
     }
