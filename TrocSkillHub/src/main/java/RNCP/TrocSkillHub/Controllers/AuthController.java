@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import RNCP.TrocSkillHub.Config.AuditLogger;
 import RNCP.TrocSkillHub.Config.JwtService;
 import RNCP.TrocSkillHub.Models.User;
 import RNCP.TrocSkillHub.Repositories.UserRepository;
@@ -34,6 +35,7 @@ public class AuthController {
     private final PasswordEncoder passwordEncoder;
     private final boolean cookieSecure;
     private final String cookieSameSite;
+    private final AuditLogger auditLogger;
 
     public AuthController(
             AuthenticationManager authenticationManager,
@@ -41,13 +43,15 @@ public class AuthController {
             UserRepository userRepository,
             PasswordEncoder passwordEncoder,
             @Value("${app.cookie.secure:true}") boolean cookieSecure,
-            @Value("${app.cookie.same-site:Lax}") String cookieSameSite) {
+            @Value("${app.cookie.same-site:Lax}") String cookieSameSite,
+            AuditLogger auditLogger) {
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.cookieSecure = cookieSecure;
         this.cookieSameSite = cookieSameSite;
+        this.auditLogger = auditLogger;
     }
 
     /**
@@ -73,6 +77,7 @@ public class AuthController {
 
         try {
             if (userRepository.existsByEmail(email)) {
+                auditLogger.warning("AUTH_REGISTER_EMAIL_EXISTS");
                 return ResponseEntity.status(400)
                         .body(Map.of("error", "Cet email existe déjà"));
             }
@@ -86,6 +91,7 @@ public class AuthController {
             newUser.setCountry(country);
 
             userRepository.save(newUser);
+            auditLogger.info("AUTH_REGISTER_SUCCESS");
 
             String token = jwtService.generateToken(email);
             ResponseCookie cookie = buildJwtCookie(token, Duration.ofDays(1));
@@ -95,6 +101,7 @@ public class AuthController {
                     .body(Map.of("message", "Inscription réussie"));
 
         } catch (Exception e) {
+            auditLogger.severe("AUTH_REGISTER_ERROR");
             return ResponseEntity.status(500)
                     .body(Map.of("error", "Erreur lors de l'inscription"));
         }
@@ -109,6 +116,8 @@ public class AuthController {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(email, password));
 
+            auditLogger.info("AUTH_LOGIN_SUCCESS");
+
             String token = jwtService.generateToken(email);
             ResponseCookie cookie = buildJwtCookie(token, Duration.ofDays(1));
 
@@ -117,6 +126,7 @@ public class AuthController {
                     .body(Map.of("message", "Connexion réussie"));
 
         } catch (AuthenticationException e) {
+            auditLogger.warning("AUTH_LOGIN_FAILURE");
             return ResponseEntity.status(401)
                     .body(Map.of("error", "Email ou mot de passe incorrect"));
         }
@@ -125,6 +135,7 @@ public class AuthController {
     @PostMapping("/logout")
     public ResponseEntity<?> logout() {
         ResponseCookie cookie = buildJwtCookie("", Duration.ZERO);
+        auditLogger.info("AUTH_LOGOUT");
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, cookie.toString())
                 .body(Map.of("message", "Déconnexion réussie"));

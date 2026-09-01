@@ -21,9 +21,15 @@ import RNCP.TrocSkillHub.Services.ImplServices.CustomUserDetailsService;
 public class SecurityConfig {
 
     private final JwtAuthFIlter jwtAuthFilter;
+    private final AuditAccessDeniedHandler auditAccessDeniedHandler;
 
-    public SecurityConfig(CustomUserDetailsService customUserDetailsService, PasswordEncoder passwordEncoder, JwtAuthFIlter jwtAuthFilter) {
+    public SecurityConfig(
+            CustomUserDetailsService customUserDetailsService,
+            PasswordEncoder passwordEncoder,
+            JwtAuthFIlter jwtAuthFilter,
+            AuditAccessDeniedHandler auditAccessDeniedHandler) {
         this.jwtAuthFilter = jwtAuthFilter;
+        this.auditAccessDeniedHandler = auditAccessDeniedHandler;
     }
 
     @Bean
@@ -39,6 +45,9 @@ public class SecurityConfig {
             .csrf(csrf -> csrf
                 .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                 .csrfTokenRequestHandler(new SpaCsrfTokenRequestHandler())
+            )
+            .exceptionHandling(ex -> ex
+                .accessDeniedHandler(auditAccessDeniedHandler)
             )
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.GET, "/auth/csrf").permitAll()
