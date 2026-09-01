@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -21,8 +20,6 @@ import RNCP.TrocSkillHub.Models.User;
 import RNCP.TrocSkillHub.Services.UserService;
 @RestController
 @RequestMapping("/users")
-
-@CrossOrigin(origins = "http://localhost:5173")
 public class UserController {
     private final UserService userService;
     private final UserMapper userMapper;
