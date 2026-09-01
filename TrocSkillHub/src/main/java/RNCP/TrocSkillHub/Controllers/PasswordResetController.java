@@ -12,6 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/auth/password-reset")
 public class PasswordResetController {
@@ -31,7 +33,7 @@ public class PasswordResetController {
     }
 
     @PostMapping("/request")
-    public ResponseEntity<?> requestReset(@RequestBody PasswordResetRequestDto dto) {
+    public ResponseEntity<?> requestReset(@Valid @RequestBody PasswordResetRequestDto dto) {
         try {
             if (!rateLimiter.isAllowed(dto.getEmail())) {
                 logger.warn("Rate limit exceeded for password reset request");
@@ -49,7 +51,7 @@ public class PasswordResetController {
     }
 
     @PostMapping("/verify")
-    public ResponseEntity<?> verifyCode(@RequestBody PasswordResetVerifyDto dto) {
+    public ResponseEntity<?> verifyCode(@Valid @RequestBody PasswordResetVerifyDto dto) {
         try {
             logger.info("Verifying password reset code");
             String token = passwordResetService.verifyCode(dto);
@@ -64,7 +66,7 @@ public class PasswordResetController {
     }
 
     @PostMapping("/reset")
-    public ResponseEntity<?> resetPassword(@RequestBody PasswordResetDto dto) {
+    public ResponseEntity<?> resetPassword(@Valid @RequestBody PasswordResetDto dto) {
         try {
             logger.info("Processing password reset");
             passwordResetService.resetPassword(dto);

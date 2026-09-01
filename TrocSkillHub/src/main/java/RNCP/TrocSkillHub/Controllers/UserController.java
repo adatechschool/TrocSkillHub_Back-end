@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PutMapping;
+import jakarta.validation.Valid;
 import RNCP.TrocSkillHub.DTOs.UserPublicResponseDTO;
 import RNCP.TrocSkillHub.DTOs.UserRequestDTO;
 import RNCP.TrocSkillHub.Mappers.UserMapper;
@@ -53,7 +54,7 @@ public class UserController {
     }
 
     @PutMapping("/me")
-    public ResponseEntity<?> updateCurrentUser(@RequestBody UserRequestDTO requestDTO, Authentication authentication) {
+    public ResponseEntity<?> updateCurrentUser(@Valid @RequestBody UserRequestDTO requestDTO, Authentication authentication) {
         Optional<Long> ownId = resolveOwnId(authentication);
         if (ownId.isEmpty()) {
             return unauthorized();
@@ -67,7 +68,7 @@ public class UserController {
     }
 
     @PatchMapping("/me")
-    public ResponseEntity<?> patchCurrentUser(@RequestBody UserRequestDTO requestDTO, Authentication authentication) {
+    public ResponseEntity<?> patchCurrentUser(@Valid @RequestBody UserRequestDTO requestDTO, Authentication authentication) {
         Optional<Long> ownId = resolveOwnId(authentication);
         if (ownId.isEmpty()) {
             return unauthorized();
@@ -96,7 +97,7 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<?> createUser(@RequestBody UserRequestDTO requestDTO) {
+    public ResponseEntity<?> createUser(@Valid @RequestBody UserRequestDTO requestDTO) {
         try {
             User user = userMapper.toEntity(requestDTO);
             User createdUser = userService.createUser(user);

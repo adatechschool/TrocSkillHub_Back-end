@@ -188,6 +188,6 @@ class PasswordResetControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$").value("Unable to reset password."));
+                .andExpect(jsonPath("$.error").value("Données invalides"));
     }
 }
