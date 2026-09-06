@@ -1,7 +1,5 @@
 name: Backup Supabase DB
 
-# Se déclenche manuellement depuis l'onglet Actions,
-# et automatiquement tous les jours à 3h UTC.
 on:
   workflow_dispatch:
   schedule:
@@ -14,9 +12,11 @@ jobs:
 
     steps:
       - name: Dump database
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
         run: |
-          pg_dump "${{ secrets.SUPABASE_DB_URL }}" -F c \
-            -f backup_$(date +%Y%m%d_%H%M%S).dump
+          docker run --rm postgres:17 \
+            pg_dump "$SUPABASE_DB_URL" -F c > backup_$(date +%Y%m%d_%H%M%S).dump
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
