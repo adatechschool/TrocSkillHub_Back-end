@@ -1,0 +1,26 @@
+name: Backup Supabase DB
+
+# Se déclenche manuellement depuis l'onglet Actions,
+# et automatiquement tous les jours à 3h UTC.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 3 * * *'
+
+jobs:
+  backup:
+    name: Dump database
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Dump database
+        run: |
+          pg_dump "${{ secrets.SUPABASE_DB_URL }}" -F c \
+            -f backup_$(date +%Y%m%d_%H%M%S).dump
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: db-backup
+          path: '*.dump'
+          retention-days: 30
